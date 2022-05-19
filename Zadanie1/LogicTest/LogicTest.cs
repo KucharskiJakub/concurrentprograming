@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LogicTest
 {
-    [TestClass]
+    /*[TestClass]
     public class LogicTest
     {
         
@@ -64,5 +64,5 @@ namespace LogicTest
              BallCreator creator = new BallCreator();
              Assert.AreEqual(creator.Pythagoras(5, 2, 6, 2), 5);
         }
-    }
+    }*/
 }

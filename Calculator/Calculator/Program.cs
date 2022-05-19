@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Runtime.CompilerServices;
-
+using System.Diagnostics;
+using System.Threading;
 namespace Calculator
 {
     public class Program
@@ -18,7 +19,8 @@ namespace Calculator
             b = Double.Parse(Console.ReadLine());
             Console.WriteLine("Podaj działanie jakie ma być wykonane na liczbach(-, +, /, *): ");
             operation = Console.ReadLine();
-
+            
+            
             switch (operation)
             {
                 case "-":
@@ -38,6 +40,7 @@ namespace Calculator
                     break;
             }
             Console.WriteLine("Wynik podanego działania to: " + result);
+            
         }
 
         public static double Add(double a, double b)

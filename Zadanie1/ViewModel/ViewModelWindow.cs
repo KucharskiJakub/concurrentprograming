@@ -6,7 +6,6 @@ namespace ViewModel
 {
     public class ViewModelWindow : ViewModelBase
     {
-        private IList _ballsContainer;
         private int _numberOfBalls;
         private readonly ModelBase _modelbase;
         private IList _balls;
@@ -24,7 +23,7 @@ namespace ViewModel
         public ICommand Stop { get; set; }
 
         public int NumberOfBalls
-        {
+        { 
             get => _numberOfBalls;
             set
             {

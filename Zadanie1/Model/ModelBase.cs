@@ -23,7 +23,7 @@ namespace Model
         => creator.CreateBalls(numberOfBalls);
         
         public override void Animation(IList balls)
-        => creator.Target((ObservableCollection<Ball>)balls);
+        => creator.Start((ObservableCollection<Ball>)balls);
         
         public override void StopAnimation() => creator.Exit();
     }

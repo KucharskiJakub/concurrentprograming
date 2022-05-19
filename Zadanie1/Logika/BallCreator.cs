@@ -14,93 +14,134 @@ namespace Logic
         public CancellationToken token;
         public CancellationTokenSource tokenSource;
         
+        private readonly object locker = new object();
+        
         public ObservableCollection<Ball> CreateBalls(int number)
         {
             ObservableCollection<Ball> ballList = new ObservableCollection<Ball>();
             tokenSource = new CancellationTokenSource();
             token = tokenSource.Token;
             targets = new List<Task>();
-            double x, y;
+            double x, y, r, ro;
             Random random = new Random();
             for (int i = 0; i < number; i++)
             {
                 x = random.Next(0, 1010);
                 y = random.Next(0, 510);
-                ballList.Add(new Ball(x, y));
+                r = random.Next(20, 40);
+                ro = random.Next(1, 5);
+                ballList.Add(new Ball(x, y, r, ro));
             }
             return ballList;
         }
-        public void Target(ObservableCollection<Ball> balls)
+        public void Start(IList<Ball> balls)
         {
-            double x, y;
+            double px, py;
+            int token;
             Random random = new Random();
             foreach (Ball ball in balls)
             {
-                x = random.Next(0, 1010);
-                y = random.Next(0, 510);
-                Thread.Sleep(5);
-                targets.Add(Task.Run(() => Steper(ball, x, y)));
+                token = random.Next(0, 2);
+                px = random.Next(0, 101);
+                py = 100-px;
+                if (token == 1)
+                {
+                    px = -px;
+                }
+                token = random.Next(0, 2);
+                if (token == 1)
+                {
+                    py = -py;
+                }
+                Thread.Sleep(1);
+                targets.Add(Task.Run(() => MainMovement(balls, ball, px, py)));
             }
         }
         
-        public async void Steper(Ball ball, double x2, double y2)
+        public async void MainMovement(IList<Ball> balls, Ball ball, double px, double py)
         {
-            int steps;
-            double xRest, yRest, xMove, yMove;
-            double distance;
-            
-            Random random = new Random();
+            double w = CalculateVelocity(ball.V, px, py);
+            ball.VX = px * w;
+            ball.VY = py * w;
             
             while (true)
             {
-                distance = Pythagoras(ball.X, x2, ball.Y, y2);
-                steps = (int) distance / 5;
-                (xMove, yMove, xRest, yRest) = MoveLength(ball.X, x2, ball.Y, y2, steps);
-                for (int i = 0; i < steps; i++)
-                {
-                    await Task.Delay(20);
-                    ball.X += xMove;
-                    ball.Y += yMove;
-                }
                 await Task.Delay(20);
-                ball.X += xRest;
-                ball.Y += yRest;
-                
-                x2 = random.Next(0, 1010) + random.NextDouble();
-                y2 = random.Next(0, 510) + random.NextDouble();
+                Move(ball ,ball.R, ball.X, ball.Y, ball.VX, ball.VY);
+
                 
                 
                 try { token.ThrowIfCancellationRequested(); }
                 catch (OperationCanceledException) { break; }
+                lock (locker)
+                {
+                    LookForCollisionsNaive(balls, ball);
+                }
             }
         }
-
-
-
-        public double Pythagoras(double x1, double x2, double y1, double y2)
-        {
-            double a, x, y;
-            x = x1 - x2;
-            y = y1 - y2;
-            x = Math.Abs(x);
-            y = Math.Abs(y);
-            a = x * x + y * y;
-            a = Math.Sqrt(a);
-            return a;
-        }
         
-        public (double, double, double, double) MoveLength(double x1, double x2, double y1, double y2, int steps)
+        
+
+
+// Iterowanie, bez drzewa
+        public void LookForCollisionsNaive(IList<Ball> balls, Ball ball)
         {
-            double x, y, xr, yr;
-            x = x2 - x1;
-            y = y2 - y1;
-            xr = x % 5;
-            yr = y % 5;
-            x = x - xr;
-            x = x / steps;
-            y = y - yr;
-            y = y / steps;
-            return (x, y, xr, yr);
+            // Iteruje po wszystkich parach kul. Jeśli są wystarczająco blisko siebie, to zatrzymuje ich ruch, oblicza 
+            // prędkość po zderzeniu i wznawia ruch
+
+        }
+
+
+
+        public double CalculateVelocity(double v, double px, double py)
+        {
+            double w = Math.Sqrt((v * v) / ((px * px) + (py * py)));
+            return w;
+        }
+        public void Move(Ball ball, double r, double x, double y, double dx, double dy)
+        {
+            double wx, wy;
+            bool xchanged = false, ychanged = false;
+            wx = x + dx;
+            wy = y + dy;
+            if (wy>540-r || wy < 0)
+            {
+                dy = -dy;
+                if (wy < 0)
+                {
+                    ball.Y = 0;
+                }
+                else
+                {
+                    ball.Y = 540 - r;
+                }
+                ychanged = true;
+            }
+            if (wx > 1040-r || wx < 0)
+            {
+                dx = -dx;
+                if (wx < 0)
+                {
+                    ball.X = 0;
+                }
+                else
+                {
+                    ball.X = 1040 - r;
+                }
+                xchanged = true;
+            }
+
+            if (!xchanged)
+            {
+                ball.X += dx;
+            }
+            if (!ychanged)
+            {
+                ball.Y += dy;
+            }
+
+            ball.VX = dx;
+            ball.VY = dy;
         }
         
         public void Exit()

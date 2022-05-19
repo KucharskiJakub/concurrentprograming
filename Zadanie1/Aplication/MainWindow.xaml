@@ -67,7 +67,26 @@
                 </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Ellipse Height="30" Width="30" StrokeThickness="4" Fill="Red" Stroke="#FF080808"/>
+                        <Ellipse Height="{Binding R}" Width="{Binding R}" StrokeThickness="4" Stroke="#FF080808">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Ro}" Value="4">
+                                            <Setter Property="Fill" Value="Blue" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Ro}" Value="3">
+                                            <Setter Property="Fill" Value="Green" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Ro}" Value="2">
+                                            <Setter Property="Fill" Value="Yellow" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Ro}" Value="1">
+                                            <Setter Property="Fill" Value="Red" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
