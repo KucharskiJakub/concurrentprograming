@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dane;
 
+[assembly: InternalsVisibleTo("LogicTest")]
+
 namespace Logic
 {
     public class BallCreator : LogicAbstractAPI
@@ -114,7 +116,6 @@ namespace Logic
                         int c = 1;
                         while (dx>r)
                         {
-                            //dx = dx - (b.VX * a * 0.01 - ball.VX * a * 0.01);
                             x1 += b.VX * a * 0.01;
                             x2 += ball.VX * a * 0.01;
                             dx = Math.Abs(x1 - x2);
@@ -125,7 +126,6 @@ namespace Logic
                             y1 += b.VX * a * 0.01;
                             y2 += ball.VX * a * 0.01;
                             dy = Math.Abs(y1 - y2);
-                            //dy = dy - (b.VY * a * 0.01 - ball.VY * a * 0.01);
                             c++;
                         }
 
@@ -136,19 +136,19 @@ namespace Logic
                         b.Y += b.VY*c*0.01;
                         ball.X += ball.VX*a*0.01;
                         ball.Y += ball.VY*c*0.01;
-                        //if (Math.Abs(b.X - ball.X) < Math.Abs(b.Y - ball.Y))
-                        //{
+                        if (Math.Abs(b.X - ball.X) < Math.Abs(b.Y - ball.Y))
+                        {
                             my = b.VY;
                             b.VY = (-b.VY+ball.VY)/2;
                             ball.VY = (-ball.VY+my)/2;
-                        //}
-                        //else
-                        //{
+                        }
+                        else
+                        {
                             mx = b.VX;
                             b.VX = (-b.VX+ball.VX)/2;
                             ball.VX = (-ball.VX+mx)/2;
                             
-                        //}
+                        }
                         
                         BTB(b, ball);
                     }

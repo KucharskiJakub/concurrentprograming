@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
+[assembly: InternalsVisibleTo("DataTest")]
+
 namespace Dane
 {
     internal class DataApi : DataAbstractAPI

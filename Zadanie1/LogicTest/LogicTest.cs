@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Logic;
+using Dane;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -7,21 +8,24 @@ using System.Threading.Tasks;
 
 namespace LogicTest
 {
-    /*[TestClass]
+    [TestClass]
     public class LogicTest
     {
         
         [TestMethod]
-        public void CreatingBallsTest()
+        public void Test1()
         {
+            BallCreator ballCreator = new BallCreator();
             ObservableCollection<Ball> ballList = new ObservableCollection<Ball>();
-            double x, y;
+            double x, y, r, ro;
             Random random = new Random();
             for (int i = 0; i < 50; i++)                       
             {
                 x = random.Next(0, 1010);
                 y = random.Next(0, 510);
-                ballList.Add(new Ball(x, y));
+                r = random.Next(20, 40);
+                ro = random.Next(1, 5);
+                ballList.Add(new Ball(x, y, r, ro));
             }
 
             foreach (var ball in ballList)
@@ -32,37 +36,7 @@ namespace LogicTest
             Assert.IsTrue(ballList.Count == 50);
         }
 
-        [TestMethod]
-        public void BallConstuctorTest()
-        {
-            Ball ball = new Ball(2,5);
-            Assert.AreEqual(ball.X, 2);
-            Assert.AreEqual(ball.Y, 5);
-        }
 
-        [TestMethod]
-        public void SteperTest()
-        {
-            ObservableCollection<Ball> balls = new ObservableCollection<Ball>();
-            BallCreator creator = new BallCreator();
-            balls = creator.CreateBalls(1);
-            Assert.IsNotNull(balls[0]);
-            Ball ball = new Ball(balls[0].X, balls[0].Y);
-            Assert.IsNotNull(ball);
-
-            creator.Steper(ball, 100,200);
-            Thread.Sleep(100);
-            
-            Assert.AreNotEqual(ball.X, balls[0].X);
-            Assert.AreNotEqual(ball.Y, balls[0].Y);
-            creator.tokenSource.Cancel();
-        }
         
-        [TestMethod]
-        public void PythagorasTest()
-        {
-             BallCreator creator = new BallCreator();
-             Assert.AreEqual(creator.Pythagoras(5, 2, 6, 2), 5);
-        }
-    }*/
+    }
 }
