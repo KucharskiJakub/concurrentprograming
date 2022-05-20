@@ -1,13 +1,12 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace Logic
+namespace Dane
 {
-   public class Ball : INotifyPropertyChanged
+    public class Ball : INotifyPropertyChanged
     {
-        private double _x, _y, _r, _ro, _m, _v, _vx, _vy;
+        private double _x, _y, _r, _ro, _m, _v, _vx, _vy, _px, _py;
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -23,10 +22,12 @@ namespace Logic
             _y = y;
             _r = r;
             _ro = ro;
-            _m = _r * _ro;
-            _v = 10;
+            _m = _r/2 * _ro*0.1;
+            _v = 4;
             _vx = 0;
             _vy = 0;
+            _px = 0;
+            _py = 0;
         }
         public double X
         { 
@@ -80,6 +81,7 @@ namespace Logic
             {
                 if (value.Equals(_v))
                     return;
+                
                 _v = value;
                 RaisePropertyChanged(nameof(V));
             }
@@ -106,8 +108,30 @@ namespace Logic
                 RaisePropertyChanged(nameof(VY));
             }
         }
+        public double PX
+        { 
+            get => _px;
+            set
+            {
+                if (value.Equals(_px))
+                    return;
+                _px = value;
+                RaisePropertyChanged(nameof(PX));
+            }
+        }
+        public double PY
+        { 
+            get => _py;
+            set
+            {
+                if (value.Equals(_py))
+                    return;
+                _py = value;
+                RaisePropertyChanged(nameof(PY));
+            }
+        }
         
         public double Mass => _m;
 
     }
-} 
+}
