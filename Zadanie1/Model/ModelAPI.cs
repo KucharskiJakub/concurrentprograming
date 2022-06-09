@@ -15,7 +15,7 @@ namespace Model
         public override void Animation(IList balls)
             => _logic.Start(balls);
         
-        public override void StopAnimation() => _logic.Exit();
+        public override void StopAnimation(IList balls) => _logic.Exit(balls);
         public ModelAPI() : this(LogicAbstractAPI.CreateBallApi()) { }
         public ModelAPI(LogicAbstractAPI logic) { _logic = logic; }
     }

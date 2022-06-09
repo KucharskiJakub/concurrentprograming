@@ -9,7 +9,7 @@ namespace Data
     public class Ball : INotifyPropertyChanged
     {
         private double _r, _ro, _m, _v;
-        private Vector _position, _velocity;
+        private Vector _destionation, _velocity;
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -21,7 +21,7 @@ namespace Data
 
         public Ball(double x, double y, double r, double ro)
         {
-            _position = new Vector(x, y);
+            _destionation = new Vector(x, y);
             _velocity = new Vector(0, 0);
             _r = r;
             _ro = ro;
@@ -30,22 +30,22 @@ namespace Data
 
         public Ball(double x, double y, double r, double ro, double vx, double vy)
         {
-            _position = new Vector(x, y);
+            _destionation = new Vector(x, y);
             _velocity = new Vector(vx, vy);
             _r = r;
             _ro = ro;
             _m = BallMass(_r, _ro);
         }
 
-        public Vector Position
+        public Vector Destination
         {
-            get => _position;
+            get => _destionation;
             set
             {
-                if (value.Equals(_position))
+                if (value.Equals(_destionation))
                     return;
-                _position = value;
-                RaisePropertyChanged(nameof(Position));
+                _destionation = value;
+                RaisePropertyChanged(nameof(Destination));
             }
         }
 

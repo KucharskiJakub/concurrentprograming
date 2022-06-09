@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Dane;
 using Data;
 
@@ -21,8 +23,11 @@ namespace Logic
         public CancellationTokenSource _tokenSource;
         
         private readonly object _locker = new object();
+        private readonly object _fileLocker = new object();
         private readonly DataAbstractAPI _data;
-        
+
+        private string _logPath = "ball_log.json";
+
         public BallCreator() : this(DataAbstractAPI.CreateBallData()) { }
         public BallCreator(DataAbstractAPI data) { _data = data; }
         
@@ -36,8 +41,7 @@ namespace Logic
         }
         public override void Start(IList balls)
         {
-            int token;
-            Random random = new Random();
+            LogBalls(balls);
             foreach (Ball ball in balls)
             {
                 _targets.Add(Task.Run(() => Move(balls, ball)));
@@ -48,41 +52,36 @@ namespace Logic
         {
             while (true)
             {
-                await Task.Delay(15);
-                // Odbicie od prawej ściany
-                if (ball.Position.X + ball.Velocity.X > 1040 - ball.R)
+                await Task.Delay(20);
+                if (ball.Destination.X + ball.Velocity.X > 1040 - ball.R)
                 {
-                    ball.Position.X = 1040 - ball.R;
+                    ball.Destination.X = 1040 - ball.R;
                     ball.Velocity.X *= -1;
                 }
-                // Odbicie od lewej ściany
-                else if (ball.Position.X + ball.Velocity.X < 0)
+                else if (ball.Destination.X + ball.Velocity.X < 0)
                 {
-                    ball.Position.X = 0;
+                    ball.Destination.X = 0;
                     ball.Velocity.X *= -1;
                 }
                 else
                 {
-                    ball.Position.X += ball.Velocity.X;
+                    ball.Destination.X += ball.Velocity.X;
                 }
 
-                // Odbicie od dolnej ściany
-                if (ball.Position.Y + ball.Velocity.Y > 540 - ball.R)
+                if (ball.Destination.Y + ball.Velocity.Y > 540 - ball.R)
                 {
-                    ball.Position.Y = 540 - ball.R;
+                    ball.Destination.Y = 540 - ball.R;
                     ball.Velocity.Y *= -1;
                 }
-                // Odbicie od górnej ściany
-                else if (ball.Position.Y + ball.Velocity.Y < 0)
+                else if (ball.Destination.Y + ball.Velocity.Y < 0)
                 {
-                    ball.Position.Y = 0;
+                    ball.Destination.Y = 0;
                     ball.Velocity.Y *= -1;
                 }
                 else
                 {
-                    ball.Position.Y += ball.Velocity.Y;
+                    ball.Destination.Y += ball.Velocity.Y;
                 }
-                // Sprawdzenie, czy nalezy zatrzymac kule
                 try { _token.ThrowIfCancellationRequested(); }
                 catch (OperationCanceledException) { break; }
                 IsBallsClash(balls, ball);
@@ -94,7 +93,7 @@ namespace Logic
             {
                 if (ball1 == ball)
                     continue;
-                Vector relativePosition = ball.Position - ball1.Position;
+                Vector relativePosition = ball.Destination - ball1.Destination;
                 double distance = Math.Sqrt(relativePosition.MagnitudeSquared());
                 if (distance * 2 <= ball.R + ball1.R)
                 {
@@ -105,43 +104,72 @@ namespace Logic
         public void B2B(Ball ball1, Ball ball2)
         {
             Vector relativeVelocity = ball2.Velocity - ball1.Velocity;
-            Vector relativePos = ball2.Position - ball1.Position;
-            // Jeśli nie lecą na siebie
+            Vector relativePos = ball2.Destination - ball1.Destination;
             if (Vector.DotProduct(relativePos, relativeVelocity) > 0)
             {
                 return;
             }
-            Vector newV1 = ball1.Velocity - 2 * ball2.Mass / (ball1.Mass + ball2.Mass) * Vector.DotProduct(ball1.Velocity - ball2.Velocity, ball1.Position - ball2.Position) / (ball1.Position - ball2.Position).MagnitudeSquared() * (ball1.Position - ball2.Position);
-            Vector newV2 = ball2.Velocity - 2 * ball1.Mass / (ball1.Mass + ball2.Mass) * Vector.DotProduct(ball2.Velocity - ball1.Velocity, ball2.Position - ball1.Position) / (ball2.Position - ball1.Position).MagnitudeSquared() * (ball2.Position - ball1.Position);
+            Vector newV1 = ball1.Velocity - 2 * ball2.Mass / (ball1.Mass + ball2.Mass) * Vector.DotProduct(ball1.Velocity - ball2.Velocity, ball1.Destination - ball2.Destination) / (ball1.Destination - ball2.Destination).MagnitudeSquared() * (ball1.Destination - ball2.Destination);
+            Vector newV2 = ball2.Velocity - 2 * ball1.Mass / (ball1.Mass + ball2.Mass) * Vector.DotProduct(ball2.Velocity - ball1.Velocity, ball2.Destination - ball1.Destination) / (ball2.Destination - ball1.Destination).MagnitudeSquared() * (ball2.Destination - ball1.Destination);
             if (double.IsNaN(ball1.Velocity.X) || double.IsNaN(ball2.Velocity.X) || double.IsNaN(ball1.Velocity.Y) || double.IsNaN(ball2.Velocity.Y))
             {
                 return;
             }
             Vector initVel1 = ball1.Velocity;
             Vector initVel2 = ball2.Velocity;
-            
-            // Sekcja krytyczna
-            lock (_locker)
+
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonCollisionInfo;
+            string now;
+            string newJsonObject;
+
+            lock (_locker) lock (_fileLocker)
                 {
                     ball1.Velocity = newV1;
                     ball2.Velocity = newV2;
 
+                    jsonCollisionInfo = JsonSerializer.Serialize(_data.CollisionInfoObject(initVel1, initVel2, ball1, ball2), options);
+                    now = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+                    newJsonObject = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"collision\":{1}\n", now, jsonCollisionInfo) + "}";
+                    _data.AppendObjectToJSONFile(_logPath, newJsonObject);
 
                 }
 
+        }
+        public void CallLogger(int interval, IList balls)
+        {
+            while (true)
+            {
+                Thread.Sleep(interval);
+                // Zatrzymaj log jeśli zatrzymano kule
+                try { _token.ThrowIfCancellationRequested(); }
+                catch (OperationCanceledException) { break; }
+                LogBalls(balls);
+            }
+        }
+
+        public void LogBalls(IList balls)
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonBalls = JsonSerializer.Serialize(balls, options);
+            string now = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+
+            string newJsonObject = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"balls\":{1}\n", now, jsonBalls) + "}";
+            lock (_fileLocker)
+            {
+                _data.AppendObjectToJSONFile(_logPath, newJsonObject);
+            }
         }
 
 
 
 
-
-
-
-        public override void Exit()
+        public override void Exit(IList balls)
         {
             if (!_tokenSource.IsCancellationRequested)
             {
                 _tokenSource.Cancel();
+                LogBalls(balls);
             }
         }
         

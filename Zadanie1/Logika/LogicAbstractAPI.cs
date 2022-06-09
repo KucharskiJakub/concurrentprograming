@@ -16,6 +16,6 @@ namespace Logic
 
         public abstract void Start(IList balls);
         
-        public abstract void Exit();
+        public abstract void Exit(IList balls);
     }
 }

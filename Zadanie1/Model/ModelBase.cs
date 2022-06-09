@@ -10,7 +10,7 @@ namespace Model
         
         public abstract void Animation(IList balls);
         
-        public abstract void StopAnimation();
+        public abstract void StopAnimation(IList balls);
         public static ModelBase CreateApi()
         {
             return new ModelAPI();

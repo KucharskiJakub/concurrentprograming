@@ -46,7 +46,7 @@ namespace ViewModel
         
         public void StopCommand()
         {
-            _modelbase.StopAnimation();
+            _modelbase.StopAnimation(_balls);
         }
         public IList Balls
         {
