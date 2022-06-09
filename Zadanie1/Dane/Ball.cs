@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Data;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Dane
+namespace Data
 {
     public class Ball : INotifyPropertyChanged
     {
-        private double _x, _y, _r, _ro, _m, _v, _vx, _vy, _px, _py;
+        private double _r, _ro, _m, _v;
+        private Vector _position, _velocity;
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -18,40 +21,53 @@ namespace Dane
 
         public Ball(double x, double y, double r, double ro)
         {
-            _x = x;
-            _y = y;
+            _position = new Vector(x, y);
+            _velocity = new Vector(0, 0);
             _r = r;
             _ro = ro;
-            _m = _r/2 * _ro*0.1;
-            _v = 4;
-            _vx = 0;
-            _vy = 0;
-            _px = 0;
-            _py = 0;
+            _m = BallMass(_r, _ro);
         }
-        public double X
-        { 
-            get => _x;
+
+        public Ball(double x, double y, double r, double ro, double vx, double vy)
+        {
+            _position = new Vector(x, y);
+            _velocity = new Vector(vx, vy);
+            _r = r;
+            _ro = ro;
+            _m = BallMass(_r, _ro);
+        }
+
+        public Vector Position
+        {
+            get => _position;
             set
             {
-                if (value.Equals(_x))
+                if (value.Equals(_position))
                     return;
-                _x = value;
-                RaisePropertyChanged(nameof(X));
+                _position = value;
+                RaisePropertyChanged(nameof(Position));
             }
         }
 
-        public double Y
-        { 
-            get => _y;
+        public Vector Velocity
+        {
+            get => _velocity;
             set
             {
-                if (value.Equals(_y))
+                if (value.Equals(_velocity))
                     return;
-                _y = value;
-                RaisePropertyChanged(nameof(Y));
+                _velocity = value;
+                RaisePropertyChanged(nameof(Velocity));
             }
         }
+        private double BallMass(double r, double ro)
+        {
+            double m = 0, v = 0;
+            v = (4 / 3) * Math.PI * r * r * r;
+            m = v * ro;
+            return m;
+        }
+
         public double R
         { 
             get => _r;
@@ -86,50 +102,7 @@ namespace Dane
                 RaisePropertyChanged(nameof(V));
             }
         }
-        public double VX
-        { 
-            get => _vx;
-            set
-            {
-                if (value.Equals(_vx))
-                    return;
-                _vx = value;
-                RaisePropertyChanged(nameof(VX));
-            }
-        }
-        public double VY
-        { 
-            get => _vy;
-            set
-            {
-                if (value.Equals(_vy))
-                    return;
-                _vy = value;
-                RaisePropertyChanged(nameof(VY));
-            }
-        }
-        public double PX
-        { 
-            get => _px;
-            set
-            {
-                if (value.Equals(_px))
-                    return;
-                _px = value;
-                RaisePropertyChanged(nameof(PX));
-            }
-        }
-        public double PY
-        { 
-            get => _py;
-            set
-            {
-                if (value.Equals(_py))
-                    return;
-                _py = value;
-                RaisePropertyChanged(nameof(PY));
-            }
-        }
+  
         
         public double Mass => _m;
 
