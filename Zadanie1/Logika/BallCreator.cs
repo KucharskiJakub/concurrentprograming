@@ -26,7 +26,7 @@ namespace Logic
         private readonly object _fileLocker = new object();
         private readonly DataAbstractAPI _data;
 
-        private string _logPath = "ball_log.json";
+        private string _logPath = "balss_movement.json";
 
         public BallCreator() : this(DataAbstractAPI.CreateBallData()) { }
         public BallCreator(DataAbstractAPI data) { _data = data; }
@@ -41,7 +41,7 @@ namespace Logic
         }
         public override void Start(IList balls)
         {
-            LogBalls(balls);
+            Log(balls);
             foreach (Ball ball in balls)
             {
                 _targets.Add(Task.Run(() => Move(balls, ball)));
@@ -119,45 +119,33 @@ namespace Logic
             Vector initVel2 = ball2.Velocity;
 
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonCollisionInfo;
-            string now;
-            string newJsonObject;
+            string jci, n, jo;
 
             lock (_locker) lock (_fileLocker)
                 {
                     ball1.Velocity = newV1;
                     ball2.Velocity = newV2;
 
-                    jsonCollisionInfo = JsonSerializer.Serialize(_data.CollisionInfoObject(initVel1, initVel2, ball1, ball2), options);
-                    now = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
-                    newJsonObject = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"collision\":{1}\n", now, jsonCollisionInfo) + "}";
-                    _data.AppendObjectToJSONFile(_logPath, newJsonObject);
+                    jci = JsonSerializer.Serialize(_data.CollisionInfoObject(initVel1, initVel2, ball1, ball2), options);
+                    n = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+                    jo = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"collision\":{1}\n", n, jci) + "}";
+                    _data.AppendObjectToJSONFile(_logPath, jo);
 
                 }
 
         }
-        public void CallLogger(int interval, IList balls)
-        {
-            while (true)
-            {
-                Thread.Sleep(interval);
-                // Zatrzymaj log jeśli zatrzymano kule
-                try { _token.ThrowIfCancellationRequested(); }
-                catch (OperationCanceledException) { break; }
-                LogBalls(balls);
-            }
-        }
 
-        public void LogBalls(IList balls)
+
+        public void Log(IList balls)
         {
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonBalls = JsonSerializer.Serialize(balls, options);
-            string now = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+            string jb = JsonSerializer.Serialize(balls, options);
+            string n = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
 
-            string newJsonObject = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"balls\":{1}\n", now, jsonBalls) + "}";
+            string jo = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"balls\":{1}\n", n, jb) + "}";
             lock (_fileLocker)
             {
-                _data.AppendObjectToJSONFile(_logPath, newJsonObject);
+                _data.AppendObjectToJSONFile(_logPath, jo);
             }
         }
 
@@ -169,7 +157,7 @@ namespace Logic
             if (!_tokenSource.IsCancellationRequested)
             {
                 _tokenSource.Cancel();
-                LogBalls(balls);
+                Log(balls);
             }
         }
         

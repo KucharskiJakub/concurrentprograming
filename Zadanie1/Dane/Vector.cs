@@ -46,14 +46,7 @@ namespace Data
             _y = y;
         }
 
-        public Vector(Vector v)
-        {
-            if (v != null)
-            {
-                _x = v.X;
-                _y = v.Y;
-            }
-        }
+    
 
         public Vector Add(Vector other)
         {
@@ -65,22 +58,18 @@ namespace Data
             return new Vector(scalar * this.X, scalar * this.Y);
         }
 
-        // Iloczyn skalarny
+        
         public static double DotProduct(Vector v1, Vector v2)
         {
             return v1.X * v2.X + v1.Y * v2.Y;
         }
 
-        // Długość wektora
+        
         public double MagnitudeSquared()
         {
             return this.X * this.X + this.Y * this.Y;
         }
 
-        public static Vector operator +(Vector v1, Vector v2)
-        {
-            return v1.Add(v2);
-        }
 
         public static Vector operator -(Vector v1, Vector v2)
         {
@@ -91,10 +80,7 @@ namespace Data
         {
             return v.MultiplyByScalar(scalar);
         }
-        public static Vector operator *(Vector v, double scalar)
-        {
-            return scalar * v;
-        }
+
 
         public override bool Equals(object obj)
         {
