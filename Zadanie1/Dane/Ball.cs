@@ -28,13 +28,14 @@ namespace Data
             _m = BallMass(_r, _ro);
         }
 
-        public Ball(double x, double y, double r, double ro, double vx, double vy)
+        public Ball(double x, double y, double r, double ro, double v, double vx, double vy)
         {
             _destionation = new Vector(x, y);
             _velocity = new Vector(vx, vy);
             _r = r;
             _ro = ro;
             _m = BallMass(_r, _ro);
+            _v = v;
         }
 
         public Vector Destination

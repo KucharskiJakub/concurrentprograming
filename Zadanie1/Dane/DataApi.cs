@@ -39,13 +39,12 @@ namespace Dane
                 vx = random.NextDouble() * v * (random.Next(0, 1) == 0 ? -1 : 1);
                 vy = Math.Sqrt(v * v - vx * vx) * (random.Next(0, 1) == 0 ? -1 : 1);
                 ro = random.Next(1, 5);
-                _ballList.Add(new Ball(x, y, r, ro, vx, vy));
+                _ballList.Add(new Ball(x, y, r, ro, v, vx, vy));
             }
             return _ballList;
         }
         public override void AppendObjectToJSONFile(string filename, string newJsonObject)
         {
-            // Jeżeli plik istnieje i jest nowy zestaw kul, to usuń stary plik
             if (NewSession)
             {
                 NewSession = false;
@@ -64,10 +63,8 @@ namespace Dane
             {
                 content = sr.ReadToEnd();
             }
-            // Jeżeli pierwszy obiekt
             content = content.TrimEnd();
             content = content.Remove(content.Length - 1, 1);
-            // Pierwszy obiekt, nie dodawaj przecinka przed
             if (content.Length == 1)
             {
                 content = String.Format("{0}\n{1}\n]\n", content.Trim(), newJsonObject);

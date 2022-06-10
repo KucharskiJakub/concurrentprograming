@@ -11,10 +11,7 @@ namespace Data
         Ball _ball_1;
         Ball _ball_2;
 
-        public CollisionInfo(Vector initial_vel_1,
-                             Vector initial_vel_2,
-                             Ball ball_1,
-                             Ball ball_2)
+        public CollisionInfo(Vector initial_vel_1, Vector initial_vel_2, Ball ball_1, Ball ball_2)
         {
             this._initial_vel_1 = initial_vel_1;
             this._initial_vel_2 = initial_vel_2;

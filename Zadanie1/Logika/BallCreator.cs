@@ -93,8 +93,10 @@ namespace Logic
             {
                 if (ball1 == ball)
                     continue;
+
                 Vector relativePosition = ball.Destination - ball1.Destination;
                 double distance = Math.Sqrt(relativePosition.MagnitudeSquared());
+
                 if (distance * 2 <= ball.R + ball1.R)
                 {
                     B2B(ball, ball1);
@@ -115,8 +117,8 @@ namespace Logic
             {
                 return;
             }
-            Vector initVel1 = ball1.Velocity;
-            Vector initVel2 = ball2.Velocity;
+            Vector velocity1 = ball1.Velocity;
+            Vector velocity2 = ball2.Velocity;
 
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
             string jci, n, jo;
@@ -124,17 +126,25 @@ namespace Logic
             lock (_locker) lock (_fileLocker)
                 {
                     ball1.Velocity = newV1;
+                    Pythagoras(ball1);
                     ball2.Velocity = newV2;
+                    Pythagoras(ball2);
 
-                    jci = JsonSerializer.Serialize(_data.CollisionInfoObject(initVel1, initVel2, ball1, ball2), options);
+                    jci = JsonSerializer.Serialize(_data.CollisionInfoObject(velocity1, velocity2, ball1, ball2), options);
                     n = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
-                    jo = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"collision\":{1}\n", n, jci) + "}";
+                    jo = "{" + String.Format("\n\t\"datetime\": \"{0}\",\n\t\"colash\":{1}\n", n, jci) + "}";
                     _data.AppendObjectToJSONFile(_logPath, jo);
 
                 }
 
         }
-
+        public void Pythagoras(Ball ball)
+        {
+            double v = 0;
+            v = (ball.Velocity.X * ball.Velocity.X) + (ball.Velocity.Y * ball.Velocity.Y);
+            v = Math.Sqrt(v);
+            ball.V=v;
+        }
 
         public void Log(IList balls)
         {
